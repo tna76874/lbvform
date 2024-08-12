@@ -10,6 +10,10 @@ from PyPDF2.generic import NameObject, TextStringObject
 import datetime
 import numpy as np
 import yaml
+import subprocess
+import os
+import tempfile
+import shutil
 
 class DatenParser:
     def __init__(self, file_path):
@@ -91,7 +95,7 @@ def parse_datetime(date_str):
     date_format = "%d.%m.%Y %H:%M"  # Beispiel: 25.12.2023 14:30
     return datetime.datetime.strptime(date_str, date_format)
 
-def fill_pdf(input_pdf_path, output_pdf_path, field_values, debug = False):
+def fill_pdf(input_pdf_path, output_pdf_path, field_values, debug = False, fillable = True):
     # Read the existing PDF
     input_pdf = PyPDF2.PdfReader(open(input_pdf_path, "rb"))
     output_pdf = PyPDF2.PdfWriter()
@@ -113,12 +117,31 @@ def fill_pdf(input_pdf_path, output_pdf_path, field_values, debug = False):
 
     with open(output_pdf_path, "wb") as output_stream:
         output_pdf.write(output_stream)
+        
+    if fillable==False:
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf', dir='/tmp') as temp_file:
+            temp_pdf_file = temp_file.name
+            
+            # command = ['qpdf', output_pdf_path, '--pages', output_pdf_path, '--', '--replace-input']
+            command = ['ps2pdf', output_pdf_path , temp_pdf_file]
+    
+            print(" ".join(command))
+            
+            # Führe den Befehl aus
+            try:
+                subprocess.run(command, check=True)
+                shutil.move(temp_pdf_file, output_pdf_path)
+            except subprocess.CalledProcessError as e:
+                print(f'Fehler beim Ausführen des Befehls: {e}')
 
 class Reisekostenantrag:
     def __init__(self, **kwargs):
         self.data = kwargs.get('data')
         if not isinstance(self.data,DatenParser):
             raise ValueError("Wring data class")
+            
+        self.fillable = kwargs.get('fillable', True)
             
         self.type='1212a'
             
@@ -231,17 +254,20 @@ class Reisekostenantrag:
             
         
         self.input = "1212a.pdf"
-        self.output = f"{self.type}_{self.data.get_all_lehrer().get(self.key, {}).get('name','')}_{self.data.get_all_lehrer().get(self.key, {}).get('vorname','')}"
+        self.output = f"{self.type}_{self.data.get_all_lehrer().get(self.key, {}).get('name','')}_{self.data.get_all_lehrer().get(self.key, {}).get('vorname','')}.pdf"
         self.debug = kwargs.get('debug', False)
     
     def render(self):
-        fill_pdf(self.input, self.output, self.values, self.debug)
+        fill_pdf(self.input, self.output, self.values, debug = self.debug, fillable = self.fillable)
         
 class Reisekostengenemigung:
     def __init__(self, **kwargs):
         self.data = kwargs.get('data')
         if not isinstance(self.data,DatenParser):
             raise ValueError("Wring data class")
+
+        self.fillable = kwargs.get('fillable', True)
+
         
         self.type='1211'
 
@@ -320,7 +346,7 @@ class Reisekostengenemigung:
         self.debug = kwargs.get('debug', False)
     
     def render(self):
-        fill_pdf(self.input, self.output, self.values, self.debug)
+        fill_pdf(self.input, self.output, self.values, debug = self.debug, fillable = self.fillable)
         
 if __name__ == "__main__":
     yaml_file = 'config.yml'
