@@ -20,8 +20,11 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 import lbvform
 
 class DatenParser:
-    def __init__(self, file_path):
-        self.data = self.load_yaml(file_path)
+    def __init__(self, data):
+        if isinstance(data, dict):
+            self.data = data
+        else:
+            self.data = self.load_yaml(data)
 
     def load_yaml(self, file_path):
         with open(file_path, 'r', encoding='utf-8') as file:
@@ -101,7 +104,7 @@ def parse_datetime(date_str):
     date_format = "%d.%m.%Y %H:%M"  # Beispiel: 25.12.2023 14:30
     return datetime.datetime.strptime(date_str, date_format)
 
-def fill_pdf(input_pdf_path, output_pdf_path, field_values, debug = False, fillable = True):
+def fill_pdf(input_pdf_path, output_pdf_path, field_values, debug = False, fillable = True, **kwargs):
     # Read the existing PDF
     input_pdf = PyPDF2.PdfReader(open(input_pdf_path, "rb"))
     output_pdf = PyPDF2.PdfWriter()
@@ -121,25 +124,11 @@ def fill_pdf(input_pdf_path, output_pdf_path, field_values, debug = False, filla
             output_pdf.update_page_form_field_values(page, field_values_mapping)
         output_pdf.add_page(page)
 
-    with open(output_pdf_path, "wb") as output_stream:
-        output_pdf.write(output_stream)
-        
-    if fillable==False:
-
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf', dir='/tmp') as temp_file:
-            temp_pdf_file = temp_file.name
-            
-            # command = ['qpdf', output_pdf_path, '--pages', output_pdf_path, '--', '--replace-input']
-            command = ['ps2pdf', output_pdf_path , temp_pdf_file]
+    if output_pdf_path!=True:
+        with open(output_pdf_path, "wb") as output_stream:
+            output_pdf.write(output_stream)
     
-            print(" ".join(command))
-            
-            # Führe den Befehl aus
-            try:
-                subprocess.run(command, check=True)
-                shutil.move(temp_pdf_file, output_pdf_path)
-            except subprocess.CalledProcessError as e:
-                print(f'Fehler beim Ausführen des Befehls: {e}')
+    return output_pdf
 
 class Reisekostenantrag:
     def __init__(self, **kwargs):
@@ -152,6 +141,8 @@ class Reisekostenantrag:
         self.type='1212a'
             
         self.key = kwargs.get('key')
+        
+        self.rendered = None
         
         if self.key not in self.data.get_all_lehrer().keys():
             raise ValueError("Key not found")
@@ -255,11 +246,12 @@ class Reisekostenantrag:
             
         
         self.input = os.path.join(os.path.dirname(lbvform.__file__), 'forms', "1212a.pdf")
-        self.output = f"{self.type}_{self.data.get_all_lehrer().get(self.key, {}).get('name','')}_{self.data.get_all_lehrer().get(self.key, {}).get('vorname','')}.pdf"
+        self._filename =  f"{self.type}_{self.data.get_all_lehrer().get(self.key, {}).get('name','')}_{self.data.get_all_lehrer().get(self.key, {}).get('vorname','')}.pdf"
+        self.output = kwargs.get('output', False) or self._filename
         self.debug = kwargs.get('debug', False)
     
     def render(self):
-        fill_pdf(self.input, self.output, self.values, debug = self.debug, fillable = self.fillable)
+        self.rendered = fill_pdf(self.input, self.output, self.values, debug = self.debug, fillable = self.fillable)
         
 class Reisekostengenemigung:
     def __init__(self, **kwargs):
@@ -268,6 +260,8 @@ class Reisekostengenemigung:
             raise ValueError("Wring data class")
 
         self.fillable = kwargs.get('fillable', True)
+
+        self.rendered = None
 
         
         self.type='1211'
@@ -342,11 +336,12 @@ class Reisekostengenemigung:
         })
     
         self.input = os.path.join(os.path.dirname(lbvform.__file__), 'forms', "1211.pdf")
-        self.output = f'{self.type}_genehmigung.pdf'
+        self._filename = f'{self.type}_genehmigung.pdf'
+        self.output = kwargs.get('output', False) or self._filename
         self.debug = kwargs.get('debug', False)
     
     def render(self):
-        fill_pdf(self.input, self.output, self.values, debug = self.debug, fillable = self.fillable)
+        self.rendered = fill_pdf(self.input, self.output, self.values, debug = self.debug, fillable = self.fillable)
 
 class ReisekostenFrame:
     def __init__(self, **kwargs):
@@ -356,9 +351,11 @@ class ReisekostenFrame:
         
         self.fillable = kwargs.get('fillable', True)
         
-        self.antraege = [Reisekostenantrag(data=self.data, key=k, fillable = self.fillable) for k in self.data.get_all_lehrer().keys()]
+        self.output = kwargs.get('output', False)
         
-        self.genemigung = Reisekostengenemigung(data=self.data, fillable = self.fillable)
+        self.antraege = [Reisekostenantrag(data=self.data, key=k, output = self.output) for k in self.data.get_all_lehrer().keys()]
+        
+        self.genemigung = Reisekostengenemigung(data=self.data, output = self.output)
         
     def render(self):
         for a in self.antraege:
@@ -367,7 +364,7 @@ class ReisekostenFrame:
         self.genemigung.render()
         
 if __name__ == "__main__":
-    yaml_file = '../config.yml'
+    yaml_file = '../example/config.yml'
     self = DatenParser(yaml_file)
 
 

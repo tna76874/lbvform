@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Datei-Upload</title>
+</head>
+<body>
+    <h1>Reisekostenantrag</h1>
+    <div id="drop-area">
+        <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" id="fileElem" name="file" accept="*/*" style="display:none;">
+            <label id="fileLabel" for="fileElem">config.yml zuerst erstellen und dann hochladen.</label>
+        </form>
+    </div>
+    <button id="download-button" onclick="downloadExample()">Beispieldatei herunterladen</button>
+
+    <script>
+        let dropArea = document.getElementById('drop-area');
+
+        dropArea.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropArea.classList.add('highlight');
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('highlight');
+        });
+
+        dropArea.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropArea.classList.remove('highlight');
+            const files = event.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        dropArea.addEventListener('click', () => {
+            document.getElementById('fileElem').click();
+        });
+
+        function handleFiles(files) {
+            const form = document.getElementById('upload-form');
+            const dataTransfer = new DataTransfer();
+            for (let i = 0; i < files.length; i++) {
+                dataTransfer.items.add(files[i]);
+            }
+            document.getElementById('fileElem').files = dataTransfer.files;
+            form.submit();
+        }
+
+        function downloadExample() {
+            window.location.href = '/example';
+        }
+    </script>
+</body>
+</html>
