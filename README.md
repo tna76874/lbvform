@@ -69,5 +69,5 @@ In dem Verzeichnis liegen (mit der vorangehenden Beispiel Konfiguration):
 
 Es sollte darauf geachtet werden, dass bei keinem 1212a die Personalnummer fehlt.
 
-Hier sind die Beispieldateien abgelegt: [Beispiele](examples/)
+Hier sind die Beispieldateien abgelegt: [Beispiele](example/)
 
