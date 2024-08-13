@@ -14,6 +14,8 @@ import subprocess
 import os
 import tempfile
 import shutil
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 class DatenParser:
     def __init__(self, file_path):
@@ -253,7 +255,7 @@ class Reisekostenantrag:
             })
             
         
-        self.input = "1212a.pdf"
+        self.input = os.path.join(os.path.dirname(lbvform.__file__), 'forms', "1212a.pdf")
         self.output = f"{self.type}_{self.data.get_all_lehrer().get(self.key, {}).get('name','')}_{self.data.get_all_lehrer().get(self.key, {}).get('vorname','')}.pdf"
         self.debug = kwargs.get('debug', False)
     
@@ -340,13 +342,30 @@ class Reisekostengenemigung:
             list(lehrer_fields.values())[i]: value for i, (key, value) in enumerate(lehrer.items())
         })
     
-
-        self.input = "1211.pdf"
+        self.input = os.path.join(os.path.dirname(lbvform.__file__), 'forms', "1211.pdf")
         self.output = f'{self.type}_genehmigung.pdf'
         self.debug = kwargs.get('debug', False)
     
     def render(self):
         fill_pdf(self.input, self.output, self.values, debug = self.debug, fillable = self.fillable)
+
+class ReisekostenFrame:
+    def __init__(self, **kwargs):
+        self.data = kwargs.get('data')
+        if not isinstance(self.data,DatenParser):
+            raise ValueError("Wrong data class")
+        
+        self.fillable = kwargs.get('fillable', True)
+        
+        self.antraege = [Reisekostenantrag(data=self.data, key=k, fillable = self.fillable) for k in self.data.get_all_lehrer().keys()]
+        
+        self.genemigung = Reisekostengenemigung(data=self.data, fillable = self.fillable)
+        
+    def render(self):
+        for a in self.antraege:
+            a.render()
+        
+        self.genemigung.render()
         
 if __name__ == "__main__":
     yaml_file = 'config.yml'
