@@ -2,7 +2,7 @@
 # -*- encoding: utf-8 -*-
 from setuptools import find_packages, setup
 
-from lbvform.version import *
+from versionmygit.version import *
 package_version = GitVersion('./lbvform', minor=0, major=0, minor_commit = 'fa158064e713acb651db3d484777c2e13419444a')
 
 setup(
@@ -13,7 +13,7 @@ setup(
     author='lmh',
     author_email='',
     license='BSD 2-clause',
-    packages=find_packages(),
+    packages=find_packages(exclude=['versionmygit']),
     include_package_data=True,
     install_requires=[
         "PyYAML",

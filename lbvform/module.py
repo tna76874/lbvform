@@ -17,6 +17,8 @@ import shutil
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
+import lbvform
+
 class DatenParser:
     def __init__(self, file_path):
         self.data = self.load_yaml(file_path)
