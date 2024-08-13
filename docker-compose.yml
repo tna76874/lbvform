@@ -1,0 +1,8 @@
+services:
+  ipcam:
+    image: ghcr.io/tna76874/lbvform:latest
+    build: "."
+    ports:
+      - "5000:5000"
+    container_name: lbvform
+    restart: always
