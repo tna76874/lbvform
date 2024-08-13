@@ -214,24 +214,19 @@ class Reisekostenantrag:
             'field030' : self.data.get_event().get('rueck_ende').strftime('%H:%M'),
             #Datum,
             'field093' : datetime.datetime.now().strftime('%d.%m.%Y'),
+            #VERANTWORTLICHE LEHRKRAFT
+            'field010' : self.data.get_verantwortlicher().get('name',''),
+            'field011' : self.data.get_verantwortlicher().get('vorname',''),
+            "field012" : self.data.get_schule().get('name',''),
         }
         
         if self.is_verantwortlich==False:
-            appended_on = { 
-                            'vorname' : 'XXXX',
-                            'nachname' : 'XXXX',
-                            'schule' : 'XXXX',
-                            }
             self.values.update({
             # Dienstreisegenehmigung ist dem Antrag von xxx beigefügt
             'field089' : '/On',    #checkbox
             'field090' : self.data.get_verantwortlicher().get('name',''),    # Name
             'field091' : self.data.get_verantwortlicher().get('vorname',''),    # Vorname
             'field092' : self.data.get_schule().get('name',''),    # Schule
-            #VERANTWORTLICHE LEHRKRAFT
-            'field010' : self.data.get_verantwortlicher().get('name',''),
-            'field011' : self.data.get_verantwortlicher().get('vorname',''),
-            "field012" : self.data.get_schule().get('name',''),
                                     })
         else:
             self.values.update({
