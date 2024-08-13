@@ -16,7 +16,9 @@ Eine Textdatei (z.B. `config.yml`) erstellen mit den Infos zu der Klassenfahrt. 
 
 ```
 event:
-  ort: Schullandheim Entenhausen
+  name: Schullandheim 
+  land: Deutschland
+  ort: Entenhausen
   art: Schullandheim
   hin_start: 04.03.2024 08:00
   hin_ende: 04.03.2024 10:00

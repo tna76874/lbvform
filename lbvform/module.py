@@ -39,6 +39,8 @@ class DatenParser:
     def get_event(self):
         event = self.parse_event_dates()
         event['days'] = int(np.ceil((event.get('rueck_ende')-event.get('hin_start')).total_seconds()/ (24 * 3600)))
+        event['1211'] = ", ".join([k for k in [event.get('name'), event.get('ort'), event.get('land', 'Deutschland')] if k !=None])
+        event['1212a'] = ", ".join([k for k in [event.get('name'), event.get('ort'), event.get('land', 'Deutschland')] if k !=None])
         return event
 
     def get_verantwortlicher(self):
@@ -172,7 +174,7 @@ class Reisekostenantrag:
             'field014' : '/Off' if self.data.get_event().get('art')=='Schullandheim' else '/On',
         
             #Veranstaltungsort (Stadt, Land)
-            'field112' : self.data.get_event().get('ort'),
+            'field112' : self.data.get_event().get('1212a'),
         
         
             #Zahl der teilnehmenden Schüler/innen
@@ -282,7 +284,7 @@ class Reisekostengenemigung:
             # Art der außerunterrichtlichen Veranstaltung
             'field006' : self.data.get_event().get('art'),
             # Veranstaltungsziel (Ort, Stadt, Land)
-            'field022' : self.data.get_event().get('ort'),
+            'field022' : self.data.get_event().get('1211'),
         
         
             #Zahl der teilnehmenden Schüler/innen
@@ -365,7 +367,7 @@ class ReisekostenFrame:
         self.genemigung.render()
         
 if __name__ == "__main__":
-    yaml_file = 'config.yml'
+    yaml_file = '../config.yml'
     self = DatenParser(yaml_file)
 
 
