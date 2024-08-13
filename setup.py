@@ -3,7 +3,7 @@
 from setuptools import find_packages, setup
 
 from versionmygit.version import *
-package_version = GitVersion('./lbvform', minor=0, major=0, minor_commit = 'fa158064e713acb651db3d484777c2e13419444a')
+package_version = GitVersion('./lbvform', minor=1, major=0, minor_commit = '09be8d42e74df9083ce01d36573b98a50c7781f7')
 
 setup(
     name='lbvform',
@@ -20,6 +20,7 @@ setup(
         "numpy",
         "PyPDF2",
         "pycryptodome",
+        "python-slugify",
     ],
     classifiers=[
         'Development Status :: 1 - Planning',

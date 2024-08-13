@@ -15,6 +15,7 @@ import os
 import tempfile
 import shutil
 import sys
+from slugify import slugify
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 import lbvform
@@ -98,6 +99,23 @@ class DatenParser:
                     begleitlehrer_dict[name] = vorname
 
         return begleitlehrer_dict
+
+    def get_description(self):
+        """Generiert eine eindeutige Beschreibung basierend auf dem Start- und Enddatum, dem Ort und dem Klassennamen."""
+        event = self.get_event()
+        klasse = self.get_klasse()
+
+        description = "_".join([k for k in [
+                                            event.get('hin_start').strftime("%Y%m%d") if event.get('hin_start') else None,
+                                            event.get('rueck_ende').strftime("%Y%m%d") if event.get('rueck_ende') else None,
+                                            event.get('name'),
+                                            event.get('ort'),
+                                            klasse.get('name', None),
+                                            ]
+                                if k !=None])
+
+
+        return slugify(description, separator="_")
 
 def parse_datetime(date_str):
     """Parses a date string into a datetime object."""
@@ -246,7 +264,12 @@ class Reisekostenantrag:
             
         
         self.input = os.path.join(os.path.dirname(lbvform.__file__), 'forms', "1212a.pdf")
-        self._filename =  f"{self.type}_{self.data.get_all_lehrer().get(self.key, {}).get('name','')}_{self.data.get_all_lehrer().get(self.key, {}).get('vorname','')}.pdf"
+        
+        self._lehrer_vorname = self.data.get_all_lehrer().get(self.key, {}).get('vorname','')
+        self._lehrer_nachname = self.data.get_all_lehrer().get(self.key, {}).get('name','')
+        
+        self._filename = slugify( f"{self.data.get_description()}_{self.type}_{self._lehrer_vorname}_{self._lehrer_nachname}", separator="_")+'.pdf'
+        
         self.output = kwargs.get('output', False) or self._filename
         self.debug = kwargs.get('debug', False)
     
@@ -335,8 +358,8 @@ class Reisekostengenemigung:
             list(lehrer_fields.values())[i]: value for i, (key, value) in enumerate(lehrer.items())
         })
     
-        self.input = os.path.join(os.path.dirname(lbvform.__file__), 'forms', "1211.pdf")
-        self._filename = f'{self.type}_genehmigung.pdf'
+        self.input = os.path.join(os.path.dirname(lbvform.__file__), 'forms', "1211.pdf")       
+        self._filename = slugify(f'{self.data.get_description()}_{self.type}_genehmigung', separator="_")+'.pdf'
         self.output = kwargs.get('output', False) or self._filename
         self.debug = kwargs.get('debug', False)
     

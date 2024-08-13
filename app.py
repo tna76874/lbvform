@@ -65,7 +65,7 @@ def upload_file():
     
         zip_buffer.seek(0)
     
-        return send_file(zip_buffer, as_attachment=True, download_name='reisekostenantrag.zip', mimetype='application/zip')
+        return send_file(zip_buffer, as_attachment=True, download_name=f'reisekostenantrag_{LBV_frame.data.get_description()}.zip', mimetype='application/zip')
 
 
     except Exception as e:
