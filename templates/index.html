@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>Datei-Upload</title>
+    <title>Reisekostenantrag</title>
 </head>
 <body>
-    <h1>Reisekostenantrag</h1>
+    <h1>Reisekostenantrag ausfüllen</h1>
+    <button id="download-button" onclick="downloadExample()">Beispiel config.yml herunterladen</button>
     <div id="drop-area">
         <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
             <input type="file" id="fileElem" name="file" accept="*/*" style="display:none;">
             <label id="fileLabel" for="fileElem">config.yml zuerst erstellen und dann hochladen.</label>
         </form>
     </div>
-    <button id="download-button" onclick="downloadExample()">Beispieldatei herunterladen</button>
 
     <script>
         let dropArea = document.getElementById('drop-area');
