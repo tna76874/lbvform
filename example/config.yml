@@ -1,0 +1,32 @@
+event:
+  ort: Schullandheim Entenhausen
+  art: Schullandheim
+  hin_start: 04.03.2024 08:00
+  hin_ende: 04.03.2024 10:00
+  rueck_start: 07.03.2024 10:00
+  rueck_ende: 07.03.2024 12:00
+
+klasse:
+  anz: 25
+  name: 08e
+
+schule:
+  name: Dagobert Gymnasium Entenhausen
+  tel: 0123456789
+
+lehrer:
+  a:
+    name: Düsentrieb
+    vorname: Daniel
+    pn: 12345678
+    unterkunft: 100
+    fahrt: 20
+
+  b:
+    name: Duck
+    vorname: Daisy
+    pn: 87654321
+    unterkunft: 100
+    fahrt: 20
+
+verantwortlicher: a

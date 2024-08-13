@@ -28,7 +28,7 @@ class DatenParser:
             return yaml.safe_load(file)
 
     def get_all_lehrer(self):
-        return self.data.get('teacher', {})
+        return self.data.get('lehrer', {})
 
     def get_schule(self):
         return self.data.get('schule', {})
