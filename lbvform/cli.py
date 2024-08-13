@@ -14,13 +14,13 @@ def main():
     parser = argparse.ArgumentParser(description="Reisekosten Management CLI")
     parser.add_argument('--config', default='config.yml', type=str, help='Path to the configuration file (YAML format)')
     parser.add_argument('-r', '--render', action='store_true', help='Render the ReisekostenFrame')
-    parser.add_argument('-f', '--fillable', action='store_false', help='PDF are not fillable')
+    # parser.add_argument('-f', '--fillable', action='store_false', help='PDF are not fillable')
 
     args = parser.parse_args()
 
     
     data_parser = DatenParser(args.config)
-    reisekosten_frame = ReisekostenFrame(data=data_parser, fillable=args.fillable)
+    reisekosten_frame = ReisekostenFrame(data=data_parser, fillable=True)
     
     if args.render==True:
         reisekosten_frame.render()
