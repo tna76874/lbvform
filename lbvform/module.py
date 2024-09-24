@@ -140,6 +140,7 @@ def fill_pdf(input_pdf_path, output_pdf_path, field_values, debug = False, filla
             output_pdf.update_page_form_field_values(page, {field_inv_values.get(key, key): value for key, value in field_values.items()})
         else:
             output_pdf.update_page_form_field_values(page, field_values_mapping)
+            print(field_inv_values)
         output_pdf.add_page(page)
 
     if output_pdf_path!=True:
@@ -170,7 +171,7 @@ class Reisekostenantrag:
 
         self.values = {
             #PERSONALNUMMER
-            "field097" : self.data.get_all_lehrer().get(self.key, {}).get('pn',''),
+            "field086" : self.data.get_all_lehrer().get(self.key, {}).get('pn',''),
             #Name
             "field001" : self.data.get_all_lehrer().get(self.key, {}).get('name',''),
             #vorname
@@ -183,19 +184,19 @@ class Reisekostenantrag:
             'field014' : '/Off' if self.data.get_event().get('art')=='Schullandheim' else '/On',
         
             #Veranstaltungsort (Stadt, Land)
-            'field112' : self.data.get_event().get('1212a'),
+            'field101' : self.data.get_event().get('1212a'),
         
         
             #Zahl der teilnehmenden Schüler/innen
-            'field033' : self.data.get_klasse().get('anz'),
+            'field100' : self.data.get_klasse().get('anz'),
             #Zahl der Begleitpersonen (einschl. verantwortliche Lehrkräfte)
-            'field111' : self.data.get_klasse().get('anz')+len(self.data.get_all_lehrer()),
+            'field033' : self.data.get_klasse().get('anz')+len(self.data.get_all_lehrer()),
             #Unterkunft und Verpflegung: Kosten antragstellende Person
-            'field034' : '/On', #CHECKBOX
-            'field042' : self.data.get_all_lehrer().get(self.key, {}).get('unterkunft',''),
+            'field035' : '/On', #CHECKBOX
+            'field102' : self.data.get_all_lehrer().get(self.key, {}).get('unterkunft',''),
             # Fahrkosten - einschließlich Ausflugsfahrten -
-            'field041' : '/On', #CHECKBOX
-            'field113' : self.data.get_all_lehrer().get(self.key, {}).get('fahrt',''),    
+            'field046' : '/On', #CHECKBOX
+            'field126' : self.data.get_all_lehrer().get(self.key, {}).get('fahrt',''),    
         
         
             ### DO NOT EDIT
@@ -224,26 +225,26 @@ class Reisekostenantrag:
             # Uhrzeit
             'field030' : self.data.get_event().get('rueck_ende').strftime('%H:%M'),
             #Datum,
-            'field093' : datetime.datetime.now().strftime('%d.%m.%Y'),
+            'field082' : datetime.datetime.now().strftime('%d.%m.%Y'),
             #VERANTWORTLICHE LEHRKRAFT
             'field010' : self.data.get_verantwortlicher().get('name',''),
             'field011' : self.data.get_verantwortlicher().get('vorname',''),
             "field012" : self.data.get_schule().get('name',''),
         }
         
-        if self.is_verantwortlich==False:
-            self.values.update({
-            # Dienstreisegenehmigung ist dem Antrag von xxx beigefügt
-            'field089' : '/On',    #checkbox
-            'field090' : self.data.get_verantwortlicher().get('name',''),    # Name
-            'field091' : self.data.get_verantwortlicher().get('vorname',''),    # Vorname
-            'field092' : self.data.get_schule().get('name',''),    # Schule
-                                    })
-        else:
-            self.values.update({
-            # Dienstreisegenehmigung ist beigefügt.
-            'field088' : '/On',    #checkbox
-                                    })
+        # if self.is_verantwortlich==False:
+        #     self.values.update({
+        #     # Dienstreisegenehmigung ist dem Antrag von xxx beigefügt
+        #     'field089' : '/On',    #checkbox
+        #     'field090' : self.data.get_verantwortlicher().get('name',''),    # Name
+        #     'field091' : self.data.get_verantwortlicher().get('vorname',''),    # Vorname
+        #     'field092' : self.data.get_schule().get('name',''),    # Schule
+        #                             })
+        # else:
+        self.values.update({
+        # Dienstreisegenehmigung ist beigefügt.
+        'field081' : '/On',    #checkbox
+                                })
         
         nebenkosten = {
                         # 'Kaffee' :'2',
@@ -374,9 +375,11 @@ class ReisekostenFrame:
         
         self.fillable = kwargs.get('fillable', True)
         
+        self.debug = kwargs.get('debug', False)
+        
         self.output = kwargs.get('output', False)
         
-        self.antraege = [Reisekostenantrag(data=self.data, key=k, output = self.output) for k in self.data.get_all_lehrer().keys()]
+        self.antraege = [Reisekostenantrag(data=self.data, key=k, output = self.output, debug = self.debug) for k in self.data.get_all_lehrer().keys()]
         
         self.genemigung = Reisekostengenemigung(data=self.data, output = self.output)
         
@@ -388,6 +391,8 @@ class ReisekostenFrame:
         
 if __name__ == "__main__":
     yaml_file = '../example/config.yml'
-    self = DatenParser(yaml_file)
+    self = ReisekostenFrame(data=DatenParser(yaml_file), debug=False)
+    self.render()
+
 
 
